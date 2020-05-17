@@ -1,4 +1,9 @@
+import dataStructures.KmerTable;
+import dataStructures.Sequence;
 import fileIO.SequenceIO;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
+
 
 public class KmerTableStoring {
 
@@ -19,13 +24,43 @@ public class KmerTableStoring {
 
     private static void directoryReadingTest (String directoryPath) {
         System.out.println("Reading files from directory: " + directoryPath);
-        sequenceIO.readFiles(directoryPath).subscribe(
+        Disposable d = sequenceIO.readFiles(directoryPath).subscribe(
                 sequence -> System.out.println("Emission: " + sequence.getId()),
                 Throwable::printStackTrace
         );
+        d.dispose();
+    }
+
+    private static void fileReadingTest (String filePath) {
+        System.out.println("Reading file: " + filePath);
+        Disposable d = sequenceIO.readFile(filePath).subscribe(
+                sequence -> System.out.println("Emission: " + sequence.getCharacters()),
+                Throwable::printStackTrace
+        );
+        d.dispose();
+    }
+
+    private static void kmerExtractionFileTest (String filePath, Integer k) {
+        System.out.println("Reading kmers of length " + k + " from file: " + filePath);
+        Observable<Sequence> sequences = sequenceIO.readFile(filePath);
+        Disposable d = sequenceIO.getAllKmers(sequences, k).subscribe(
+                kmer -> System.out.println("Emission: " + kmer),
+                Throwable::printStackTrace
+        );
+        d.dispose();
+    }
+
+    private static void kmerExtractionDirectoryTest (String directoryPath, Integer k) {
+        System.out.println("Reading kmers of length " + k + " from directory: " + directoryPath);
+        Observable<Sequence> sequences = sequenceIO.readFiles(directoryPath);
+        Disposable d = sequenceIO.getAllKmers(sequences, k).subscribe(
+                kmer -> System.out.println("Emission: " + kmer),
+                Throwable::printStackTrace
+        );
+        d.dispose();
     }
 
     public static void main(String[] args) {
-        directoryReadingTest(testYeastDirectory);
+        fileReadingTest(testYeastDirectory + "/PoolEthProd-1M_1.fastq");
     }
 }

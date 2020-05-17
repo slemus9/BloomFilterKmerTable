@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -177,6 +178,34 @@ public class SequenceIO {
                 return Observable.error(e);
             }
         }
+    }
+
+    /**
+     * Extracts the kmers of length k from a given sequence
+     * @param sequence - sequence to process
+     * @param k - length of the kmer
+     * @return an Observable of all the kmers of the sequence
+     */
+    private Observable<String> getKmersFromSequence (Sequence sequence, Integer k) {
+        String characters = sequence.getCharacters();
+        int n = characters.length();
+        ArrayList<String> kmers = new ArrayList<>();
+
+        for (int i = 0; i <=n - k; i++) {
+            String kmer = characters.substring(i, i + k);
+            kmers.add(kmer);
+        }
+        return Observable.fromIterable(kmers);
+    }
+
+    /**
+     * From an Observable source of sequences, reads all the kmers of length k
+     * @param sequences - Observable source of sequences
+     * @param k - length of the kmers
+     * @return Observable with all the kmers from the sequences
+     */
+    public Observable<String> getAllKmers (Observable<Sequence> sequences, Integer k) {
+        return sequences.flatMap(sequence -> getKmersFromSequence(sequence, k));
     }
 }
 
