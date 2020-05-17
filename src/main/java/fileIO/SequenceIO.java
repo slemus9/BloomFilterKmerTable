@@ -144,9 +144,8 @@ public class SequenceIO {
      */
     public Observable<Sequence> readFiles (List<String> filePaths) {
         String extension = getFileExtension(filePaths.get(0));
-        System.out.println(extension);
-        System.out.println(filePaths);
         Boolean allWithSameFormat = filePaths.stream().allMatch(path -> getFileExtension(path).equals(extension));
+
         if (allWithSameFormat) {
             return Observable.fromIterable(filePaths).flatMap(this::readFile);
         } else {
