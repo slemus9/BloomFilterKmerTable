@@ -46,7 +46,7 @@ public class SequenceIO {
 
     /**
      * Creates a sequence from FASTQ information. It assumes that the
-     * received list with the information has 4 files, following the FASTQ format:
+     * received list with the information has 4 lines, following the FASTQ format:
      * line 1: @{sequence_id}
      * line 2: {sequence_characters}
      * line 3: +[{sequence_id}]
@@ -111,6 +111,11 @@ public class SequenceIO {
                 );
     }
 
+    /**
+     * Gets the extension of a given file path
+     * @param filePath - path of the file
+     * @return the extension of the file
+     */
     private String getFileExtension (String filePath) {
         File file = new File(filePath);
         String fileName = file.getName();
