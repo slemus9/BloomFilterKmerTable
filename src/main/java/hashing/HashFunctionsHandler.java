@@ -15,7 +15,7 @@ public class HashFunctionsHandler {
         this.numFunctions = numFunctions;
     }
 
-    public List<Function<String, Integer>> getFunctions (int length) {
+    public List<Function<String, Integer>> getFunctions () {
         return getIndependentSeeds().map(
                 seed ->
                     (Function<String, Integer>) s -> MurmurHash3.murmurhash3_x86_32(s, 0, s.length(), seed)
