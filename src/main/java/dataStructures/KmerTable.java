@@ -8,9 +8,9 @@ public class KmerTable {
     private BloomFilter<String> kmerSet;
     private HashMap<String, Integer> kmerMap;
 
-    public KmerTable (int k, int expectedNumKmers){
+    public KmerTable (int k, int expectedNumKmers, double expectedError){
         this.k = k;
-        this.kmerSet = new BloomFilter<>(4*expectedNumKmers, expectedNumKmers);
+        this.kmerSet = new BloomFilter<>(expectedNumKmers, expectedError);
         this.kmerMap = new HashMap<>();
     }
 

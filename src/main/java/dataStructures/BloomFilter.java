@@ -13,10 +13,10 @@ public class BloomFilter <A> {
     private final BitArray bitArray;
     private final int size;
 
-    public BloomFilter (int size, int expectedNumEntries) {
-        this.size = size;
+    public BloomFilter (int expectedNumEntries, double expectedError) {
+        this.size = getBitArraySize(expectedNumEntries, expectedError);
         this.bitArray = new BitArray(size);
-        int numFunctions = getNumberOfFunctions(expectedNumEntries);
+        int numFunctions = getNumberOfFunctions(size, expectedNumEntries);
         this.hashFunctions = generateFunctions(numFunctions);
     }
 
@@ -24,6 +24,13 @@ public class BloomFilter <A> {
         this.size = size;
         this.bitArray = new BitArray(size);
         this.hashFunctions = hashFunctions;
+    }
+
+    private int getBitArraySize (int expectedNumEntries, double expectedError) {
+        double logErr = Math.log(expectedError);
+        double log2 = Math.log(2);
+        double size = - (expectedNumEntries*logErr)/(Math.pow(log2, 2));
+        return (int) size;
     }
 
     private List<Function<A, Integer>> generateFunctions (int numFunctions) {
@@ -34,8 +41,8 @@ public class BloomFilter <A> {
                 .collect(Collectors.toList());
     }
 
-    private int getNumberOfFunctions (int expectedNumEntries){
-        return (int) (size/expectedNumEntries*Math.log(2));
+    private int getNumberOfFunctions (int size, int expectedNumEntries){
+        return (int) Math.round((size/expectedNumEntries)*Math.log(2));
     }
 
     private Stream<Integer> getIndices (A a) {

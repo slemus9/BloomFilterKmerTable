@@ -1,7 +1,9 @@
 package hashing;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -16,17 +18,17 @@ public class HashFunctionsHandler {
     }
 
     public List<Function<String, Integer>> getFunctions () {
-        return getIndependentSeeds().map(
+        return getIndependentSeeds().stream().map(
                 seed ->
                     (Function<String, Integer>) s -> MurmurHash3.murmurhash3_x86_32(s, 0, s.length(), seed)
         ).collect(Collectors.toList());
     }
 
-    private Stream<Integer> getIndependentSeeds () {
+    private List<Integer> getIndependentSeeds () {
         Random r = new Random();
-        Stream<Integer> seeds = IntStream.range(1, numFunctions).map(x -> r.nextInt(Short.MAX_VALUE)).boxed();
-        while (seeds.collect(Collectors.toSet()).size() != numFunctions)
-            seeds = IntStream.range(1, numFunctions).map(x -> r.nextInt(Short.MAX_VALUE)).boxed();
+        List<Integer> seeds = IntStream.range(0, numFunctions).map(x -> r.nextInt(Short.MAX_VALUE)).boxed().collect(Collectors.toList());
+        while (new HashSet(seeds).size() != numFunctions)
+            getIndependentSeeds();
         return seeds;
     }
 }
