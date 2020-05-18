@@ -214,6 +214,10 @@ public class SequenceIO {
         return sequences.flatMap(sequence -> getKmersFromSequence(sequence, k));
     }
 
+    public Observable<String> getAllUniqueKmers (Observable<Sequence> sequences, int k) {
+        return getAllKmers(sequences, k).distinct();
+    }
+
     /**
      * Get the number of kmers from an Observable source of sequences
      * @param sequences - Observable of sequences

@@ -11,15 +11,15 @@ public class KmerTable {
     public KmerTable (int k, int expectedNumKmers, double expectedError){
         this.k = k;
         this.kmerSet = new BloomFilter<>(expectedNumKmers, expectedError);
-        this.kmerMap = new HashMap<>();
+        //this.kmerMap = new HashMap<>();
     }
 
     public void add (String kmer) {
         if (kmerSet.contains(kmer)) {
-            kmerMap.compute(kmer, (k, v) -> v == null ? 1 : v + 1);
+            //kmerMap.compute(kmer, (k, v) -> v == null ? 1 : v + 1);
         } else {
             kmerSet.add(kmer);
-            kmerMap.put(kmer, 1);
+            //kmerMap.put(kmer, 1);
         }
     }
 

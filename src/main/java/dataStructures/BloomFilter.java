@@ -46,7 +46,11 @@ public class BloomFilter <A> {
     }
 
     private Stream<Integer> getIndices (A a) {
-        return hashFunctions.stream().map(h -> h.apply(a));
+        return hashFunctions.stream().map(h -> {
+            long longValue = h.apply(a);
+            int value = h.apply(a);
+            return value;
+        });
     }
 
     public void add (A a) {
