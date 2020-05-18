@@ -16,7 +16,8 @@ public class BloomFilter <A> {
     public BloomFilter (int size, int expectedNumEntries) {
         this.size = size;
         this.bitArray = new BitArray(size);
-        this.hashFunctions = generateFunctions(expectedNumEntries);
+        int numFunctions = getNumberOfFunctions(expectedNumEntries);
+        this.hashFunctions = generateFunctions(numFunctions);
     }
 
     public BloomFilter (int size, List<Function<A, Integer>> hashFunctions) {
@@ -25,8 +26,7 @@ public class BloomFilter <A> {
         this.hashFunctions = hashFunctions;
     }
 
-    private List<Function<A, Integer>> generateFunctions (int expectedNumEntries) {
-        int numFunctions = getNumberOfFunctions(expectedNumEntries);
+    private List<Function<A, Integer>> generateFunctions (int numFunctions) {
         HashFunctionsHandler functionsHandler = new HashFunctionsHandler(numFunctions);
         return functionsHandler
                 .getFunctions().stream()
