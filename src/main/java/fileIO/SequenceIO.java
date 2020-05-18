@@ -4,6 +4,7 @@ import customRxFuncions.BufferUntil;
 import dataStructures.Sequence;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableOperator;
+import io.reactivex.rxjava3.core.Single;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -191,7 +192,7 @@ public class SequenceIO {
      * @param k - length of the kmer
      * @return an Observable of all the kmers of the sequence
      */
-    private Observable<String> getKmersFromSequence (Sequence sequence, Integer k) {
+    private Observable<String> getKmersFromSequence (Sequence sequence, int k) {
         String characters = sequence.getCharacters();
         int n = characters.length();
         ArrayList<String> kmers = new ArrayList<>();
@@ -209,8 +210,18 @@ public class SequenceIO {
      * @param k - length of the kmers
      * @return Observable with all the kmers from the sequences
      */
-    public Observable<String> getAllKmers (Observable<Sequence> sequences, Integer k) {
+    public Observable<String> getAllKmers (Observable<Sequence> sequences, int k) {
         return sequences.flatMap(sequence -> getKmersFromSequence(sequence, k));
+    }
+
+    /**
+     * Get the number of kmers from an Observable source of sequences
+     * @param sequences - Observable of sequences
+     * @param k - length of each kmer
+     * @return A Single with the number of kmers
+     */
+    public Single<Integer> estimateNumberOfKmers (Observable<Sequence> sequences, int k) {
+        return sequences.reduce(0, (acc, seq) -> acc + (seq.getCharacters().length() - k) * k);
     }
 }
 

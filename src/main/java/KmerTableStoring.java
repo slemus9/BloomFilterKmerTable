@@ -2,6 +2,7 @@ import dataStructures.KmerTable;
 import dataStructures.Sequence;
 import fileIO.SequenceIO;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 
@@ -43,9 +44,13 @@ public class KmerTableStoring {
     private static void kmerExtractionFileTest (String filePath, Integer k) {
         System.out.println("Reading kmers of length " + k + " from file: " + filePath);
         Observable<Sequence> sequences = sequenceIO.readFile(filePath);
-        Disposable d = sequenceIO.getAllKmers(sequences, k).subscribe(
-                kmer -> System.out.println("Emission: " + kmer),
-                Throwable::printStackTrace
+        Single<Integer> estimatedNumKmers = sequenceIO.estimateNumberOfKmers(sequences, k);
+        Observable<String> kmers = sequenceIO.getAllKmers(sequences, k);
+        Disposable d = estimatedNumKmers.subscribe(
+                numKmers -> {
+                    KmerTable kmerTable = new KmerTable(k, numKmers);
+                    kmers.subscribe(kmerTable::add);
+                }
         );
         d.dispose();
     }
@@ -53,9 +58,13 @@ public class KmerTableStoring {
     private static void kmerExtractionDirectoryTest (String directoryPath, Integer k) {
         System.out.println("Reading kmers of length " + k + " from directory: " + directoryPath);
         Observable<Sequence> sequences = sequenceIO.readFiles(directoryPath);
-        Disposable d = sequenceIO.getAllKmers(sequences, k).subscribe(
-                kmer -> System.out.println("Emission: " + kmer),
-                Throwable::printStackTrace
+        Single<Integer> estimatedNumKmers = sequenceIO.estimateNumberOfKmers(sequences, k);
+        Observable<String> kmers = sequenceIO.getAllKmers(sequences, k);
+        Disposable d = estimatedNumKmers.subscribe(
+                numKmers -> {
+                    KmerTable kmerTable = new KmerTable(k, numKmers);
+                    kmers.subscribe(kmerTable::add);
+                }
         );
         d.dispose();
     }
