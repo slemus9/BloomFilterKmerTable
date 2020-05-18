@@ -60,6 +60,7 @@ public class KmerTableStoring {
         d.dispose();
     }
 
+
     public static void main(String[] args) {
         fileReadingTest(testYeastDirectory + "/PoolEthProd-1M_1.fastq");
     }
