@@ -3,6 +3,7 @@ package dataStructures;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BloomFilter <A> {
 
@@ -15,8 +16,8 @@ public class BloomFilter <A> {
         this.bitArray = new BitArray(size);
     }
 
-    private List<Integer> getIndices (A a) {
-        return hashFunctions.stream().map(h -> h.apply(a)).collect(Collectors.toList());
+    private Stream<Integer> getIndices (A a) {
+        return hashFunctions.stream().map(h -> h.apply(a));
     }
 
     public void add (A a) {
@@ -24,7 +25,7 @@ public class BloomFilter <A> {
     }
 
     public boolean contains (A a) {
-        return getIndices(a).stream().allMatch(bitArray::get);
+        return getIndices(a).allMatch(bitArray::get);
     }
 
     public int getSize () {
