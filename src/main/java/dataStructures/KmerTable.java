@@ -7,11 +7,11 @@ import java.util.HashMap;
 
 public class KmerTable {
 
-    private Integer k;
+    private int k;
     private BloomFilter<String> kmerSet;
     private HashMap<String, Integer> kmerMap;
 
-    public KmerTable (Integer k){
+    public KmerTable (int k){
         this.k = k;
     }
 
