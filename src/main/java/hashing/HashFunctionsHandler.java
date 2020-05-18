@@ -24,6 +24,9 @@ public class HashFunctionsHandler {
 
     private Stream<Integer> getIndependentSeeds () {
         Random r = new Random();
-        return IntStream.range(1, numFunctions).map(x -> r.nextInt(Short.MAX_VALUE) + x).boxed();
+        Stream<Integer> seeds = IntStream.range(1, numFunctions).map(x -> r.nextInt(Short.MAX_VALUE)).boxed();
+        while (seeds.collect(Collectors.toSet()).size() != numFunctions)
+            seeds = IntStream.range(1, numFunctions).map(x -> r.nextInt(Short.MAX_VALUE)).boxed();
+        return seeds;
     }
 }
