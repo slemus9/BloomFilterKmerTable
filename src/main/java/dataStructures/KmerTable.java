@@ -1,57 +1,72 @@
 package dataStructures;
 
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class KmerTable {
 
-    private int k;
+//    private int k;
     private BloomFilter<String> kmerSet;
-    private int[] kmerMap;
+    private Map<CharSequence, Short> kmerMap;
 
-    public KmerTable (int k, int expectedNumKmers, double expectedError){
-        this.k = k;
-        this.kmerSet = new BloomFilter<>(expectedNumKmers, expectedError);
-        this.kmerMap = new int[expectedNumKmers];
-    }
+//    public KmerTable (int k, int expectedNumKmers, double expectedError){
+//        this.k = k;
+//        this.kmerSet = new BloomFilter<>(expectedNumKmers, expectedError);
+//        this.kmerMap = new int[expectedNumKmers];
+//    }
 
-    public KmerTable (int k, BloomFilter<String> kmerSet, Observable<String> kmers) {
-        this.k = k;
-        this.kmerSet = kmerSet;
-        this.kmerMap = new int[kmerSet.getSize()];
+    public KmerTable (int expectedNumEntries, double expectedError) {
+//        this.k = k;
+//        this.kmerSet = kmerSet;
+        this.kmerSet = new BloomFilter<>(expectedNumEntries, expectedError);
+        this.kmerMap = new HashMap<>();
     }
 
     public void add (String kmer) {
-        kmerMap[getPosition(kmer)] ++;
+        if (kmerSet.contains(kmer)){
+            kmerMap.compute(kmer, (k, v) -> v == null ? 2 : (short)(v + 1));
+        } else {
+            kmerSet.add(kmer);
+        }
+    }
+
+    public short get (String kmer) {
+        return kmerMap.getOrDefault(kmer, (short) 1);
     }
 
     public int getSize () {
-        return kmerMap.length;
+        return kmerMap.size();
     }
 
-    private int getPosition (String key) {
-        return key.hashCode() & (getSize() - 1);
-    }
 
-    private int get (String key) {
-        return kmerMap[getPosition(key)];
-    }
-
-    public void fillMapFromSource (Observable<String> kmers) {
-        
-    }
-
-    public void store (String outputFilePath, Observable<String> keys) {
+    public void store (String outputFilePath) {
         try {
+            File outputFile = new File(outputFilePath);
+            if (outputFile.exists()){
+                outputFile.delete();
+            }
+
+            System.out.println("Writing into file: " + outputFilePath);
             BufferedWriter bw = new BufferedWriter(new FileWriter(outputFilePath, true));
             bw.write("kmer,frequency\n");
-            keys.subscribe(
-                    key -> bw.write(String.format("%s,%d\n", key, get(key)))
-            );
-        } catch (IOException e) {
+
+            kmerMap.forEach((key, v) -> {
+                System.out.println("Storing kmer: " + key);
+                try {
+                    bw.write(String.format("%s,%d\n", key, v));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            });
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -46,7 +46,6 @@ public class BitArray {
     }
 
     /**
-     *
      * @return the size in bits of the array
      */
     public int getSize () {

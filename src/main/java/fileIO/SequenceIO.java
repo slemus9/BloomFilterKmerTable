@@ -1,8 +1,7 @@
 package fileIO;
 
 import customRxFuncions.BufferUntil;
-import dataStructures.BloomFilter;
-import dataStructures.Pair;
+import dataStructures.KmerTable;
 import dataStructures.Sequence;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableOperator;
@@ -41,7 +40,7 @@ public class SequenceIO {
      * @param inputFile
      * @return A name for an output file
      */
-    private String buildOutputFileNameKmerTable (String inputFile) {
+    public String buildOutputFileNameKmerTable (String inputFile) {
         File file = new File(inputFile);
         String fileName = file.getName();
         return fileName + "_frequencies.csv";
@@ -217,37 +216,31 @@ public class SequenceIO {
     }
 
     /**
-     * Gets all the unique kmers from an observable source of sequences. Returns a pair with
-     * the bloom filter used to get the unique kmers and an observable of the resulting kmers.
-     * @param sequences - Observable source of sequences
-     * @param k - length of each kmer
-     * @param expectedNumKmers - expected number of kmers in the sequence source
-     * @param expectedError - expected error of false positive for the bloom filter
-     * @return a pair with the bloom filter used to get the unique kmers and an observable of the resulting kmers
-     */
-    public Pair<BloomFilter<String>, Observable<String>> getAllUniqueKmers (Observable<Sequence> sequences, int k, int expectedNumKmers, int expectedError) {
-        BloomFilter<String> kmerSet = new BloomFilter<>(expectedNumKmers, expectedError);
-        Observable<String> uniqueKmersSource = getAllKmers(sequences, k).map(kmer -> {
-            if (kmerSet.contains(kmer)){
-                return "";
-            } else {
-                kmerSet.add(kmer);
-                return kmer;
-            }
-        }).filter(s -> !s.equals(""));
-        return new Pair<>(kmerSet, uniqueKmersSource);
-    }
-
-
-
-    /**
      * Get the number of kmers from an Observable source of sequences
      * @param sequences - Observable of sequences
      * @param k - length of each kmer
      * @return A Single with the number of kmers
      */
-    public Single<Integer> estimateNumberOfKmers (Observable<Sequence> sequences, int k) {
+    public Single<Integer> getNumberOfKmers(Observable<Sequence> sequences, int k) {
         return sequences.reduce(0, (acc, seq) -> acc + (seq.getCharacters().length() - k) * k);
+    }
+
+    public Single<KmerTable> fillKmerTable (Observable<Sequence> sequences, int k, int expectedNumKmers, double expectedError){
+        return getAllKmers(sequences, k).reduce(new KmerTable(expectedNumKmers, expectedError), (table, kmer) -> {
+            table.add(kmer);
+            System.out.println("Adding (1-mers are omitted). Value: " + table.get(kmer) + " k-mer: " + kmer);
+            return table;
+        });
+    }
+
+    public Single<KmerTable> fillKmerTable (Observable<Sequence> sequences, int k, double expectedError) {
+        return getNumberOfKmers(sequences, k).flatMap(
+                numKmers -> getAllKmers(sequences, k).reduce(new KmerTable(numKmers, expectedError), (table, kmer) -> {
+                    table.add(kmer);
+                    System.out.println("Adding (1-mers are omitted). Value: " + table.get(kmer) + " k-mer: " + kmer);
+                    return table;
+                })
+        );
     }
 }
 

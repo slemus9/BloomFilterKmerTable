@@ -44,34 +44,17 @@ public class KmerTableStoring {
     private static void kmerExtractionFileTest (String filePath, int k, double expectedError) {
         System.out.println("Reading kmers of length " + k + " from file: " + filePath);
         Observable<Sequence> sequences = sequenceIO.readFile(filePath);
-        Single<Integer> estimatedNumKmers = sequenceIO.estimateNumberOfKmers(sequences, k);
-        Observable<String> kmers = sequenceIO.getAllKmers(sequences, k);
-        Disposable d = estimatedNumKmers.subscribe(
-                numKmers -> {
-                    KmerTable kmerTable = new KmerTable(k, numKmers, expectedError);
-                    kmers.subscribe(
-                            kmer -> {
-                                System.out.println("Emission: " + kmer);
-                                kmerTable.add(kmer);
-                            }
-                    );
-                }
+        sequenceIO.fillKmerTable(sequences, k, 160000000, expectedError).subscribe(
+                kmerTable -> kmerTable.store(sequenceIO.buildOutputFileNameKmerTable(filePath))
         );
-        d.dispose();
     }
 
     private static void kmerExtractionDirectoryTest (String directoryPath, int k, double expectedError) {
         System.out.println("Reading kmers of length " + k + " from directory: " + directoryPath);
         Observable<Sequence> sequences = sequenceIO.readFiles(directoryPath);
-        Single<Integer> estimatedNumKmers = sequenceIO.estimateNumberOfKmers(sequences, k);
-        Observable<String> kmers = sequenceIO.getAllKmers(sequences, k);
-        Disposable d = estimatedNumKmers.subscribe(
-                numKmers -> {
-                    KmerTable kmerTable = new KmerTable(k, numKmers, expectedError);
-                    kmers.subscribe(kmerTable::add);
-                }
+        sequenceIO.fillKmerTable(sequences, k, expectedError).subscribe(
+                kmerTable -> kmerTable.store(sequenceIO.buildOutputFileNameKmerTable(directoryPath))
         );
-        d.dispose();
     }
 
 
