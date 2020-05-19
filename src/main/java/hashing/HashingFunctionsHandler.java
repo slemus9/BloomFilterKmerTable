@@ -2,12 +2,11 @@ package hashing;
 
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class HashFunctionsHandler {
+public class HashingFunctionsHandler {
 
     /**
      * Number of functions to be created.
@@ -19,7 +18,7 @@ public class HashFunctionsHandler {
      * Constructor of the class
      * @param numFunctions - Number of functions to be created
      */
-    public HashFunctionsHandler (int numFunctions) {
+    public HashingFunctionsHandler(int numFunctions) {
         this.numFunctions = numFunctions;
     }
 
@@ -40,7 +39,6 @@ public class HashFunctionsHandler {
      * @return - A list of seeds for the hashing functions
      */
     private List<Integer> getIndependentSeeds () {
-        Random r = new Random();
         List<Integer> seeds = IntStream.range(1, numFunctions + 1).boxed().collect(Collectors.toList());
         return seeds;
     }

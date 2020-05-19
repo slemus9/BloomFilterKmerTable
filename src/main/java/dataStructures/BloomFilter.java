@@ -1,6 +1,6 @@
 package dataStructures;
 
-import hashing.HashFunctionsHandler;
+import hashing.HashingFunctionsHandler;
 
 import java.util.List;
 import java.util.function.Function;
@@ -60,7 +60,7 @@ public class BloomFilter <A> {
      * @return - A list of hash functions
      */
     private List<Function<A, Integer>> generateFunctions (int numFunctions) {
-        HashFunctionsHandler functionsHandler = new HashFunctionsHandler(numFunctions);
+        HashingFunctionsHandler functionsHandler = new HashingFunctionsHandler(numFunctions);
         return functionsHandler
                 .getFunctions(bitArray.getSize()).stream()
                 .map(h -> (Function<A, Integer>) a -> h.apply(a.toString()))
