@@ -30,6 +30,7 @@ public class BitArray {
      */
     public boolean get (int idx) {
         int mask = 1 << (idx % BITS_IN_SEGMENT);
+        int segmentPos = idx / BITS_IN_SEGMENT;
         return (arr[idx / BITS_IN_SEGMENT] & mask) == mask;
     }
 

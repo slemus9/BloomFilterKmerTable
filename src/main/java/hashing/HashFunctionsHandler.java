@@ -25,12 +25,13 @@ public class HashFunctionsHandler {
 
     /**
      * Creates a collection of hashing functions given the value of numFunctions
+     * @param upperBound - Limit number that the hashing functions can output
      * @return - A list of hashing functions (MurmurHash3)
      */
-    public List<Function<String, Integer>> getFunctions () {
+    public List<Function<String, Integer>> getFunctions (int upperBound) {
         return getIndependentSeeds().stream().map(
                 seed ->
-                    (Function<String, Integer>) s -> MurmurHash3.murmurhash3_x86_32(s, 0, s.length(), seed) >>> 1
+                    (Function<String, Integer>) s -> MurmurHash3.murmurhash3_x86_32(s, 0, s.length(), seed) % upperBound
         ).collect(Collectors.toList());
     }
 

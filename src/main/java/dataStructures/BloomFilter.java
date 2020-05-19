@@ -23,11 +23,6 @@ public class BloomFilter <A> {
     private final BitArray bitArray;
 
     /**
-     * The size of the bit array
-     */
-    private final int bitArraySize;
-
-    /**
      * Number of elements in the BloomFilter
      */
     private int size = 0;
@@ -39,21 +34,10 @@ public class BloomFilter <A> {
      * @param expectedError - Expected probability of false positives
      */
     public BloomFilter (int expectedNumEntries, double expectedError) {
-        this.bitArraySize = getBitArraySize(expectedNumEntries, expectedError);
+        int bitArraySize = getBitArraySize(expectedNumEntries, expectedError);
         this.bitArray = new BitArray(bitArraySize);
         int numFunctions = getNumberOfFunctions(bitArraySize, expectedNumEntries);
         this.hashFunctions = generateFunctions(numFunctions);
-    }
-
-    /**
-     * Bloom filter constructor given a predefined bit array and hash functions
-     * @param bitArraySize - predefined bit array
-     * @param hashFunctions - predefined hash functions
-     */
-    public BloomFilter (int bitArraySize, List<Function<A, Integer>> hashFunctions) {
-        this.bitArraySize = bitArraySize;
-        this.bitArray = new BitArray(bitArraySize);
-        this.hashFunctions = hashFunctions;
     }
 
     /**
@@ -78,7 +62,7 @@ public class BloomFilter <A> {
     private List<Function<A, Integer>> generateFunctions (int numFunctions) {
         HashFunctionsHandler functionsHandler = new HashFunctionsHandler(numFunctions);
         return functionsHandler
-                .getFunctions().stream()
+                .getFunctions(bitArray.getSize()).stream()
                 .map(h -> (Function<A, Integer>) a -> h.apply(a.toString()))
                 .collect(Collectors.toList());
     }
@@ -123,10 +107,6 @@ public class BloomFilter <A> {
      */
     public boolean contains (A a) {
         return getIndices(a).allMatch(bitArray::get);
-    }
-
-    public int getBitArraySize() {
-        return bitArraySize;
     }
 
     /**
