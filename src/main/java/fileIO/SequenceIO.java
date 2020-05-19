@@ -1,6 +1,8 @@
 package fileIO;
 
 import customRxFuncions.BufferUntil;
+import dataStructures.BloomFilter;
+import dataStructures.Pair;
 import dataStructures.Sequence;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableOperator;
@@ -42,7 +44,7 @@ public class SequenceIO {
     private String buildOutputFileNameKmerTable (String inputFile) {
         File file = new File(inputFile);
         String fileName = file.getName();
-        return fileName + "_frequencies.out";
+        return fileName + "_frequencies.csv";
     }
 
     /**
@@ -214,9 +216,29 @@ public class SequenceIO {
         return sequences.flatMap(sequence -> getKmersFromSequence(sequence, k));
     }
 
-    public Observable<String> getAllUniqueKmers (Observable<Sequence> sequences, int k) {
-        return getAllKmers(sequences, k).distinct();
+    /**
+     * Gets all the unique kmers from an observable source of sequences. Returns a pair with
+     * the bloom filter used to get the unique kmers and an observable of the resulting kmers.
+     * @param sequences - Observable source of sequences
+     * @param k - length of each kmer
+     * @param expectedNumKmers - expected number of kmers in the sequence source
+     * @param expectedError - expected error of false positive for the bloom filter
+     * @return a pair with the bloom filter used to get the unique kmers and an observable of the resulting kmers
+     */
+    public Pair<BloomFilter<String>, Observable<String>> getAllUniqueKmers (Observable<Sequence> sequences, int k, int expectedNumKmers, int expectedError) {
+        BloomFilter<String> kmerSet = new BloomFilter<>(expectedNumKmers, expectedError);
+        Observable<String> uniqueKmersSource = getAllKmers(sequences, k).map(kmer -> {
+            if (kmerSet.contains(kmer)){
+                return "";
+            } else {
+                kmerSet.add(kmer);
+                return kmer;
+            }
+        }).filter(s -> !s.equals(""));
+        return new Pair<>(kmerSet, uniqueKmersSource);
     }
+
+
 
     /**
      * Get the number of kmers from an Observable source of sequences

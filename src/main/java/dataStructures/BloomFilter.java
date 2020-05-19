@@ -9,23 +9,60 @@ import java.util.stream.Stream;
 
 public class BloomFilter <A> {
 
+    /**
+     * A list of hash functions: h_i : A -> Int.
+     * Each hash maps to a position in the BitArray
+     */
     private final List<Function<A, Integer>> hashFunctions;
-    private final BitArray bitArray;
-    private final int size;
 
+    /**
+     * The array used to indicate if an element belongs to the set of elements.
+     * An element x belongs to the BloomFilter if bitArray[h_i(x)] = 1 for all
+     * i in {1 .. |hashFunctions|}
+     */
+    private final BitArray bitArray;
+
+    /**
+     * The size of the bit array
+     */
+    private final int bitArraySize;
+
+    /**
+     * Number of elements in the BloomFilter
+     */
+    private int size = 0;
+
+    /**
+     * Bloom filter constructor given the expected number of elements to be added and
+     * the expected probability of false positives
+     * @param expectedNumEntries - Expected number of elements to be added
+     * @param expectedError - Expected probability of false positives
+     */
     public BloomFilter (int expectedNumEntries, double expectedError) {
-        this.size = getBitArraySize(expectedNumEntries, expectedError);
-        this.bitArray = new BitArray(size);
-        int numFunctions = getNumberOfFunctions(size, expectedNumEntries);
+        this.bitArraySize = getBitArraySize(expectedNumEntries, expectedError);
+        this.bitArray = new BitArray(bitArraySize);
+        int numFunctions = getNumberOfFunctions(bitArraySize, expectedNumEntries);
         this.hashFunctions = generateFunctions(numFunctions);
     }
 
-    public BloomFilter (int size, List<Function<A, Integer>> hashFunctions) {
-        this.size = size;
-        this.bitArray = new BitArray(size);
+    /**
+     * Bloom filter constructor given a predefined bit array and hash functions
+     * @param bitArraySize - predefined bit array
+     * @param hashFunctions - predefined hash functions
+     */
+    public BloomFilter (int bitArraySize, List<Function<A, Integer>> hashFunctions) {
+        this.bitArraySize = bitArraySize;
+        this.bitArray = new BitArray(bitArraySize);
         this.hashFunctions = hashFunctions;
     }
 
+    /**
+     * Calculates the bit array that minimizes the false positive probability to the expectedError value,
+     * given the expected number of elements to be added
+     * @param expectedNumEntries - Expected number of elements to be added
+     * @param expectedError - Expected probability of false positives
+     * @return the size of the needed bit array
+     */
     private int getBitArraySize (int expectedNumEntries, double expectedError) {
         double logErr = Math.log(expectedError);
         double log2 = Math.log(2);
@@ -33,6 +70,11 @@ public class BloomFilter <A> {
         return (int) size;
     }
 
+    /**
+     * Creates a list a list of hashing functions
+     * @param numFunctions - Number of functions to be created
+     * @return - A list of hash functions
+     */
     private List<Function<A, Integer>> generateFunctions (int numFunctions) {
         HashFunctionsHandler functionsHandler = new HashFunctionsHandler(numFunctions);
         return functionsHandler
@@ -41,26 +83,56 @@ public class BloomFilter <A> {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Calculates the number of needed hashing functions in accordance to the expected
+     * number of elements to be added to the set and the size of the bit array
+     * @param size - Size of the bit array
+     * @param expectedNumEntries - Expected number of elements to be added
+     * @return the number of functions to be created
+     */
     private int getNumberOfFunctions (int size, int expectedNumEntries){
-        return (int) Math.round((size/expectedNumEntries)*Math.log(2));
+        return (int) Math.round(((size + 0.0)/expectedNumEntries)*Math.log(2));
     }
 
+    /**
+     * Applies and returns the indices that correspond to the given element
+     * in the bloom filter (the application of the hashing functions to the
+     * element)
+     * @param a - Element to verify
+     * @return a collection of the corresponding elements
+     */
     private Stream<Integer> getIndices (A a) {
-        return hashFunctions.stream().map(h -> {
-            long longValue = h.apply(a);
-            int value = h.apply(a);
-            return value;
-        });
+        return hashFunctions.stream().map(h -> h.apply(a));
     }
 
+    /**
+     * Adds an element to the bloom filter. Sets all the bits to 1 in the bit array,
+     * that correspond to the indices of the element mapped by the hashing functions
+     * @param a - Element to be added
+     */
     public void add (A a) {
         getIndices(a).forEach(idx -> bitArray.set(idx, true));
+        size ++;
     }
 
+    /**
+     * Checks if an element (with an error rate of the given expectedError value) belongs to
+     * the bloom filter
+     * @param a - Element to verify
+     * @return true if the element belongs to the set, false otherwise
+     */
     public boolean contains (A a) {
         return getIndices(a).allMatch(bitArray::get);
     }
 
+    public int getBitArraySize() {
+        return bitArraySize;
+    }
+
+    /**
+     *
+     * @return number of elements in the bloom filter
+     */
     public int getSize () {
         return size;
     }
