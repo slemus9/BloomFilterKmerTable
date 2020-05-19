@@ -31,7 +31,7 @@ public class HashFunctionsHandler {
     public List<Function<String, Integer>> getFunctions (int upperBound) {
         return getIndependentSeeds().stream().map(
                 seed ->
-                    (Function<String, Integer>) s -> MurmurHash3.murmurhash3_x86_32(s, 0, s.length(), seed) % upperBound
+                    (Function<String, Integer>) s -> (MurmurHash3.murmurhash3_x86_32(s, 0, s.length(), seed) >>> 1) % upperBound
         ).collect(Collectors.toList());
     }
 
