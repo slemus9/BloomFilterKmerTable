@@ -9,12 +9,24 @@ import java.util.stream.IntStream;
 
 public class HashFunctionsHandler {
 
+    /**
+     * Number of functions to be created.
+     * the functions must be of type: String -> Int
+     */
     private final int numFunctions;
 
+    /**
+     * Constructor of the class
+     * @param numFunctions - Number of functions to be created
+     */
     public HashFunctionsHandler (int numFunctions) {
         this.numFunctions = numFunctions;
     }
 
+    /**
+     * Creates a collection of hashing functions given the value of numFunctions
+     * @return - A list of hashing functions (MurmurHash3)
+     */
     public List<Function<String, Integer>> getFunctions () {
         return getIndependentSeeds().stream().map(
                 seed ->
@@ -22,6 +34,10 @@ public class HashFunctionsHandler {
         ).collect(Collectors.toList());
     }
 
+    /**
+     * Creates a collection of different seeds for the hashing functions
+     * @return - A list of seeds for the hashing functions
+     */
     private List<Integer> getIndependentSeeds () {
         Random r = new Random();
         List<Integer> seeds = IntStream.range(1, numFunctions + 1).boxed().collect(Collectors.toList());
