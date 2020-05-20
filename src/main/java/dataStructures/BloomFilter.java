@@ -62,7 +62,7 @@ public class BloomFilter <A> {
     private List<Function<A, Integer>> generateFunctions (int numFunctions) {
         HashingFunctionsHandler functionsHandler = new HashingFunctionsHandler(numFunctions);
         return functionsHandler
-                .getFunctions(bitArray.getSize()).stream()
+                .getFunctions(bitArray.getSize())
                 .map(h -> (Function<A, Integer>) a -> h.apply(a.toString()))
                 .collect(Collectors.toList());
     }
@@ -115,5 +115,16 @@ public class BloomFilter <A> {
      */
     public int getSize () {
         return size;
+    }
+
+    public static void main(String[] args) {
+        BloomFilter<String> bloomFilter = new BloomFilter<>(10, 0.01);
+        bloomFilter.add("Sebastian");
+        bloomFilter.add("DNA sequence");
+        bloomFilter.add("Lemus");
+        System.out.println(bloomFilter.contains("Sebastian"));
+        System.out.println(bloomFilter.contains("RNA sequence"));
+        System.out.println(bloomFilter.contains("Lemus"));
+        System.out.println(bloomFilter.contains("lemus"));
     }
 }
